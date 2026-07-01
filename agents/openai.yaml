@@ -1,4 +1,4 @@
 interface:
   display_name: "Chrome Automation"
   short_description: "Persistent dedicated local Chrome profile for automation"
-  default_prompt: "Use $chrome-automation to control the persistent dedicated local Chrome profile. Reply in Chinese by default. Use DOM-first automation only: inspect DOM, extract text, execute JavaScript, and interact with forms. Do not use screenshots, vision, or image-input workflows."
+  default_prompt: "Use $chrome-automation to control the persistent dedicated local Chrome profile. Reply in the user system language by default. Use DOM-first automation only: inspect DOM, extract text, execute JavaScript, and interact with forms. Do not use screenshots, vision, or image-input workflows."
