@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Codex skill for controlling a dedicated local Chrome profile through DevTools/CDP.",
   "private": true,
+  "scripts": { "postinstall": "bash scripts/postinstall.sh" },
   "license": "MIT",
   "files": [
     "SKILL.md",

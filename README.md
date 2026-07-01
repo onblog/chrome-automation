@@ -12,7 +12,7 @@ Unlike a typical Playwright-style setup that behaves like a fresh private sessio
 
 - Dedicated Chrome profile for automation
 - Persistent session and login state in the dedicated profile
-- One-command setup for local dependencies and Codex MCP configuration
+- One-command setup for local dependencies and required Codex `chrome-devtools` MCP configuration
 - Chrome DevTools/CDP URL opening helper
 - Health check script
 - Uninstall script that removes the skill, state directory, and dedicated Chrome profile
@@ -34,28 +34,17 @@ npm_config_cache=/tmp/npm-cache npx --yes skills add onblog/chrome-automation -g
 
 You can also install from a full Git URL.
 
-Then run setup from the installed Codex skill directory:
-
-```bash
-skill_dir="${CODEX_HOME:-$HOME/.codex}/skills/chrome-automation"
-"$skill_dir/scripts/setup"
-```
-
-The setup script:
-
-- installs the skill-local Node dependency under `~/.codex/chrome-automation`
-- configures Codex `chrome-devtools` MCP to use this skill
-- launches the dedicated Chrome profile on port `9223`
-
-## Verify
-
-```bash
-"$skill_dir/scripts/doctor"
-```
+No separate setup step is required. Installation triggers a postinstall step that prepares the local dependencies and Codex integration automatically.
 
 After installing a skill, restart Codex to pick up new skills.
 
-Expected checks include Node/npm/Codex availability, local dependency installation, Chrome listening on the configured port, DevTools `/json/version`, and Codex MCP configuration.
+If you need a manual health check later, you can still run:
+
+```bash
+"${CODEX_HOME:-$HOME/.codex}/skills/chrome-automation/scripts/doctor"
+```
+
+Expected checks include Node/npm/Codex availability, local dependency installation, Chrome listening on the configured port, DevTools `/json/version`, and Codex `chrome-devtools` MCP configuration.
 
 ## Usage
 
@@ -69,6 +58,26 @@ Use the skill in Codex:
 
 ```text
 Use $chrome-automation to open https://example.com and summarize the visible page.
+```
+
+Using this skill in Codex requires the `chrome-devtools` MCP integration; the CDP helper scripts alone are not a substitute for MCP-driven control inside Codex.
+
+## Example Prompts
+
+```text
+Use $chrome-automation to open https://example.com/login, sign in, then summarize the visible dashboard.
+```
+
+```text
+Use $chrome-automation to open https://example.com/form, fill the form with the provided values, submit it, and return the result shown on the page.
+```
+
+```text
+Use $chrome-automation to open https://example.com/quiz, answer the questions based on the provided rules, submit the form, and report the final score or confirmation text.
+```
+
+```text
+Use $chrome-automation to open an internal admin page, navigate to the target section, and extract the key status fields.
 ```
 
 ## Configuration

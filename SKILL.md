@@ -7,17 +7,28 @@ description: Use when Codex needs to launch, inspect, or control a local dedicat
 
 Use a dedicated Chrome profile for browser automation. Do not attach to the daily Chrome profile unless the user explicitly asks and accepts the risk.
 
+Use this skill when Codex should control a persistent local Chrome session rather than a disposable browser. It is especially suitable for opening websites, reusing saved login state, filling forms, submitting answers, navigating multi-step flows, and extracting results from authenticated pages.
+
 This repository is a Codex skill. It is designed to be installed from GitHub with `npx skills add` and does not need to be published to npm.
 
-## One-Command Setup
+## Setup Behavior
 
-Run setup after installing the skill:
+This skill runs its setup automatically during installation, so no manual setup step is required for most users.
+
+If you need to re-run setup manually:
 
 ### Session and login behavior
 
 This skill uses a dedicated Chrome profile, not a throwaway browser. Chrome is launched against the same profile directory each time, so cookies, local storage, and authenticated sessions can persist across Codex runs.
 
 Use this when automation should remember an internal login, reuse an SSO session, or avoid repeating authentication on every run. If a site requires login, sign in once in the dedicated profile and the next run can reuse that session until the profile is cleared.
+
+Typical use cases include:
+- opening target websites in the dedicated profile
+- reusing an existing login instead of signing in every time
+- filling forms and submitting them
+- answering quiz or questionnaire pages and submitting results
+- navigating authenticated flows and extracting the final page content
 
 ```bash
 skill_dir="${CODEX_HOME:-$HOME/.codex}/skills/chrome-automation"
@@ -61,7 +72,7 @@ Open a URL in that profile through CDP:
 "$skill_dir/scripts/chrome-cdp-open" "https://example.com"
 ```
 
-Use the MCP wrapper for Codex `chrome-devtools`:
+Use the required MCP wrapper for Codex `chrome-devtools`:
 
 ```bash
 "$skill_dir/scripts/chrome-devtools-mcp-current"
@@ -83,7 +94,7 @@ curl -sS "http://127.0.0.1:${CHROME_DEBUG_PORT:-9223}/json/version"
 
 ## Codex MCP Configuration
 
-Setup performs this automatically. To do it manually:
+Codex `chrome-devtools` MCP is required for full use of this skill inside Codex. Setup performs this automatically. To do it manually:
 
 ```bash
 codex mcp remove chrome-devtools

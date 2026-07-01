@@ -10,7 +10,8 @@
 
 - 启动一个独立的 Chrome 配置文件用于自动化
 - 支持在专用配置文件里保持独立登录态
-- 一键完成本地依赖和 Codex `chrome-devtools` MCP 配置
+- 一键完成本地依赖安装
+- 配置 Codex `chrome-devtools` MCP，Codex 内的完整使用依赖它
 - 提供 CDP 打开 URL 的脚本
 - 提供健康检查脚本
 - 提供卸载脚本，可同时清理 skill、状态目录和专用 Chrome 配置文件
@@ -30,26 +31,15 @@
 npm_config_cache=/tmp/npm-cache npx --yes skills add onblog/chrome-automation -g --agent codex -y
 ```
 
-安装完成后，进入 Codex skill 目录执行初始化：
-
-```bash
-skill_dir="${CODEX_HOME:-$HOME/.codex}/skills/chrome-automation"
-"$skill_dir/scripts/setup"
-```
-
-`setup` 会做这些事：
-
-- 安装 skill 本地依赖到 `~/.codex/chrome-automation`
-- 配置 Codex 的 `chrome-devtools` MCP
-- 启动专用 Chrome 配置文件，默认端口 `9223`
-
-## 验证
-
-```bash
-"$skill_dir/scripts/doctor"
-```
+安装完成后不需要再手动执行初始化，安装过程会自动完成本地依赖准备和 Codex `chrome-devtools` MCP 集成配置。
 
 建议安装新 skill 后，重启 Codex，让新能力生效。
+
+如果后续需要手动检查环境，可以运行：
+
+```bash
+"${CODEX_HOME:-$HOME/.codex}/skills/chrome-automation/scripts/doctor"
+```
 
 ## 常用命令
 
@@ -63,6 +53,26 @@ skill_dir="${CODEX_HOME:-$HOME/.codex}/skills/chrome-automation"
 
 ```text
 Use $chrome-automation to open https://example.com and summarize the visible page.
+```
+
+在 Codex 里使用这个 skill 时，`chrome-devtools` MCP 是必须的；单靠 CDP 脚本不能替代 Codex 内的 MCP 能力。
+
+## 示例 Prompt
+
+```text
+使用 $chrome-automation 打开 https://example.com/login，完成登录后总结当前仪表盘页面的主要内容。
+```
+
+```text
+使用 $chrome-automation 打开 https://example.com/form，按照给定的字段值自动填写表单，提交后返回页面显示的结果。
+```
+
+```text
+使用 $chrome-automation 打开 https://example.com/quiz，按照题目规则自动答题，提交后返回最终得分或确认信息。
+```
+
+```text
+使用 $chrome-automation 打开一个内部管理页面，进入目标模块并提取关键状态字段。
 ```
 
 ## 配置项
