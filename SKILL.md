@@ -9,6 +9,8 @@ Use a dedicated Chrome profile for browser automation. Do not attach to the dail
 
 Use this skill when Codex should control a persistent local Chrome session rather than a disposable browser. It is especially suitable for opening websites, reusing saved login state, filling forms, submitting answers, navigating multi-step flows, and extracting results from authenticated pages.
 
+This skill should be used in DOM-first mode. Prefer DOM inspection, selectors, text extraction, JavaScript evaluation, and form interaction instead of screenshot-based or image-input workflows. Ignore or avoid screenshot, vision, and image-related capabilities when the Codex session does not support image input.
+
 This repository is a Codex skill. It is designed to be installed from GitHub with `npx skills add` and does not need to be published to npm.
 
 ## Setup Behavior
@@ -90,7 +92,7 @@ curl -sS "http://127.0.0.1:${CHROME_DEBUG_PORT:-9223}/json/version"
 ```
 
 4. Open the requested page with `scripts/chrome-cdp-open`.
-5. For rich DOM, console, network, screenshot, or interaction work, use the configured `chrome-devtools` MCP. If the current Codex session does not expose MCP tools, direct CDP scripts can still operate through CDP.
+5. For DOM, console, network, or interaction work, use the configured `chrome-devtools` MCP in DOM-first mode. If the current Codex session does not support image input, ignore screenshot/vision-style tools and drive the page through selectors and JavaScript instead.
 
 ## Codex MCP Configuration
 

@@ -33,6 +33,8 @@ npm_config_cache=/tmp/npm-cache npx --yes skills add onblog/chrome-automation -g
 
 安装完成后不需要再手动执行初始化，安装过程会自动完成本地依赖准备和 Codex `chrome-devtools` MCP 集成配置。
 
+这个 skill 推荐以“纯 DOM 模式”使用：优先通过 DOM 查询、文本提取、JavaScript 执行和表单交互来操作页面；如果当前 Codex 会话提示不支持 image input，就不要走截图或视觉能力。
+
 建议安装新 skill 后，重启 Codex，让新能力生效。
 
 如果后续需要手动检查环境，可以运行：

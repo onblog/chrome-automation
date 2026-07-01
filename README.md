@@ -38,6 +38,8 @@ No separate setup step is required. Installation triggers a postinstall step tha
 
 After installing a skill, restart Codex to pick up new skills.
 
+This skill is intended for DOM-first automation. If your Codex session reports that no image-input endpoints are available, use DOM inspection, text extraction, and JavaScript evaluation instead of screenshot or vision workflows.
+
 If you need a manual health check later, you can still run:
 
 ```bash
