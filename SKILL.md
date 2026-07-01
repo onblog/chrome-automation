@@ -11,6 +11,8 @@ Use this skill when Codex should control a persistent local Chrome session rathe
 
 This skill should be used in DOM-first mode. Prefer DOM inspection, selectors, text extraction, JavaScript evaluation, and form interaction instead of screenshot-based or image-input workflows. Ignore or avoid screenshot, vision, and image-related capabilities when the Codex session does not support image input.
 
+By default, replies should be in Chinese unless the user explicitly requests another language. The agent must not depend on screenshots or image input to understand the page.
+
 This repository is a Codex skill. It is designed to be installed from GitHub with `npx skills add` and does not need to be published to npm.
 
 ## Setup Behavior
