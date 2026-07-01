@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+url="${1:-https://example.com}"
+profile_dir="${CHROME_DEBUG_PROFILE:-${HOME}/.codex/chrome-debug-profile}"
+port_file="${profile_dir}/DevToolsActivePort"
+state_dir="${CHROME_AUTOMATION_HOME:-${HOME}/.codex/chrome-automation}"
+ws_module="${state_dir}/node/node_modules/ws"
+
+CHROME_CDP_URL="$url" CHROME_CDP_PORT_FILE="$port_file" CHROME_CDP_WS_MODULE="$ws_module" CHROME_DEBUG_PORT="${CHROME_DEBUG_PORT:-9223}" node <<'NODE'
+const fs = require("fs");
+
+const targetUrl = process.env.CHROME_CDP_URL;
+let nextId = 1;
+const pending = new Map();
+
+async function resolveWsUrl() {
+  if (fs.existsSync(process.env.CHROME_CDP_PORT_FILE)) {
+    const lines = fs.readFileSync(process.env.CHROME_CDP_PORT_FILE, "utf8").trim().split(/\n/);
+    if (lines[0] && lines[1]) return `ws://127.0.0.1:${lines[0]}${lines[1]}`;
+  }
+
+  const port = process.env.CHROME_DEBUG_PORT || "9223";
+  const response = await fetch(`http://127.0.0.1:${port}/json/version`);
+  if (!response.ok) throw new Error(`DevTools discovery failed: HTTP ${response.status}`);
+  const version = await response.json();
+  if (!version.webSocketDebuggerUrl) throw new Error("DevTools discovery response has no webSocketDebuggerUrl");
+  return version.webSocketDebuggerUrl;
+}
+
+async function openViaHttpNew() {
+  const port = process.env.CHROME_DEBUG_PORT || "9223";
+  const endpoint = `http://127.0.0.1:${port}/json/new?${encodeURIComponent(targetUrl)}`;
+  const response = await fetch(endpoint, { method: "PUT" });
+  if (!response.ok) throw new Error(`DevTools /json/new failed: HTTP ${response.status}`);
+  return response.json();
+}
+
+function send(method, params = {}) {
+  const id = nextId++;
+  globalThis.__ws.send(JSON.stringify({ id, method, params }));
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve, reject });
+    setTimeout(() => {
+      if (pending.has(id)) {
+        pending.delete(id);
+        reject(new Error(`timeout: ${method}`));
+      }
+    }, 10000);
+  });
+}
+
+async function main() {
+  try {
+    const target = await openViaHttpNew();
+    console.log(`Opened: ${targetUrl}`);
+    console.log(`Target: ${target.id}`);
+    return;
+  } catch {
+    // Fall back to browser-level CDP. Some Chromium builds disable /json/new.
+  }
+
+  if (!fs.existsSync(process.env.CHROME_CDP_WS_MODULE)) {
+    throw new Error(`ws dependency not found: ${process.env.CHROME_CDP_WS_MODULE}. Run scripts/setup first.`);
+  }
+  const WebSocket = require(process.env.CHROME_CDP_WS_MODULE);
+  const wsUrl = await resolveWsUrl();
+  const ws = new WebSocket(wsUrl);
+  globalThis.__ws = ws;
+
+  ws.on("message", (data) => {
+    const message = JSON.parse(data.toString());
+    if (!message.id || !pending.has(message.id)) return;
+    const waiter = pending.get(message.id);
+    pending.delete(message.id);
+    if (message.error) waiter.reject(new Error(JSON.stringify(message.error)));
+    else waiter.resolve(message.result);
+  });
+
+  ws.on("open", async () => {
+    try {
+      const version = await send("Browser.getVersion");
+      const target = await send("Target.createTarget", {
+        url: targetUrl,
+        newWindow: false,
+        background: false,
+      });
+      console.log(`Connected: ${version.product}`);
+      console.log(`Opened: ${targetUrl}`);
+      console.log(`Target: ${target.targetId}`);
+      ws.close();
+    } catch (error) {
+      console.error(error.message);
+      ws.close();
+      process.exitCode = 1;
+    }
+  });
+
+  ws.on("error", (error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}
+
+main().catch((error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});
+NODE

@@ -1,0 +1,30 @@
+{
+  "name": "chrome-automation-skill",
+  "version": "0.1.0",
+  "description": "Codex skill for controlling a dedicated local Chrome profile through DevTools/CDP.",
+  "private": true,
+  "license": "MIT",
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "LICENSE",
+    "agents/openai.yaml",
+    "scripts/*",
+    "README.zh-CN.md"
+  ],
+  "keywords": [
+    "agent-skill",
+    "codex",
+    "chrome",
+    "devtools",
+    "automation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onblog/chrome-automation.git"
+  },
+  "homepage": "https://github.com/onblog/chrome-automation#readme",
+  "bugs": {
+    "url": "https://github.com/onblog/chrome-automation/issues"
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chrome Automation"
+  short_description: "Persistent dedicated local Chrome profile for automation"
+  default_prompt: "Use $chrome-automation to open a URL in the persistent dedicated local Chrome profile."

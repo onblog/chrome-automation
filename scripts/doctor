@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -u
+
+state_dir="${CHROME_AUTOMATION_HOME:-${HOME}/.codex/chrome-automation}"
+profile_dir="${CHROME_DEBUG_PROFILE:-${HOME}/.codex/chrome-debug-profile}"
+port="${CHROME_DEBUG_PORT:-9223}"
+ok=0
+
+check() {
+  label="$1"
+  shift
+  if "$@" >/dev/null 2>&1; then
+    echo "OK   ${label}"
+  else
+    echo "FAIL ${label}"
+    ok=1
+  fi
+}
+
+check "node" command -v node
+check "npm" command -v npm
+check "codex" command -v codex
+check "ws dependency" test -d "${state_dir}/node/node_modules/ws"
+check "profile directory" test -d "$profile_dir"
+
+if command -v lsof >/dev/null 2>&1; then
+  check "Chrome listening on ${port}" lsof -Pan "-iTCP:${port}" -sTCP:LISTEN
+else
+  echo "SKIP lsof not found; cannot check listening port"
+fi
+
+if command -v curl >/dev/null 2>&1; then
+  check "DevTools /json/version" curl -fsS "http://127.0.0.1:${port}/json/version"
+else
+  echo "SKIP curl not found; cannot check DevTools HTTP endpoint"
+fi
+
+if command -v codex >/dev/null 2>&1; then
+  if codex mcp list 2>/dev/null | grep -q "chrome-automation/scripts/chrome-devtools-mcp-current"; then
+    echo "OK   Codex chrome-devtools MCP points to this skill"
+  else
+    echo "FAIL Codex chrome-devtools MCP is not configured for this skill"
+    ok=1
+  fi
+fi
+
+exit "$ok"

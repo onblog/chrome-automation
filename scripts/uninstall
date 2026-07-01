@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+skill_dir="$(cd "${script_dir}/.." && pwd)"
+state_dir="${CHROME_AUTOMATION_HOME:-${HOME}/.codex/chrome-automation}"
+profile_dir="${CHROME_DEBUG_PROFILE:-${HOME}/.codex/chrome-debug-profile}"
+codex_skill_dir="${CODEX_HOME:-${HOME}/.codex}/skills/chrome-automation"
+skills_cli_codex_dir="${HOME}/.agents/skills/chrome-automation"
+
+if command -v pkill >/dev/null 2>&1; then
+  pkill -f -- "--user-data-dir=${profile_dir}" >/dev/null 2>&1 || true
+  sleep 1
+fi
+
+if command -v codex >/dev/null 2>&1; then
+  current_mcp="$(codex mcp list 2>/dev/null || true)"
+  if printf '%s\n' "$current_mcp" | grep -q "${skill_dir}/scripts/chrome-devtools-mcp-current"; then
+    codex mcp remove chrome-devtools >/dev/null 2>&1 || true
+  fi
+fi
+
+rm -rf "$state_dir"
+rm -rf "$profile_dir"
+
+if [[ "$skill_dir" == "$codex_skill_dir" || "$skill_dir" == "$skills_cli_codex_dir" ]]; then
+  if command -v npx >/dev/null 2>&1; then
+    npm_config_cache="${npm_config_cache:-/tmp/npm-cache}" npx --yes skills remove chrome-automation -g --agent codex -y >/dev/null 2>&1 || true
+  fi
+  rm -rf "$skill_dir"
+else
+  echo "Skill files left in place: ${skill_dir}"
+  echo "Remove them with: npm_config_cache=/tmp/npm-cache npx --yes skills remove chrome-automation -g --agent codex -y"
+fi
+
+echo "Chrome automation skill and local state removed."

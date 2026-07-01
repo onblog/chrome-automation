@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+profile_dir="${CHROME_DEBUG_PROFILE:-${HOME}/.codex/chrome-debug-profile}"
+port="${CHROME_DEBUG_PORT:-9223}"
+url="${1:-about:blank}"
+
+mkdir -p "$profile_dir"
+
+args=(
+  "--remote-debugging-port=${port}"
+  "--remote-allow-origins=*"
+  "--user-data-dir=${profile_dir}"
+  "$url"
+)
+
+if [[ -n "${CHROME_BIN:-}" ]]; then
+  "$CHROME_BIN" "${args[@]}" >/dev/null 2>&1 &
+  exit 0
+fi
+
+case "$(uname -s)" in
+  Darwin)
+    exec open -na "Google Chrome" --args "${args[@]}"
+    ;;
+  Linux)
+    for candidate in google-chrome google-chrome-stable chromium chromium-browser; do
+      if command -v "$candidate" >/dev/null 2>&1; then
+        "$candidate" "${args[@]}" >/dev/null 2>&1 &
+        exit 0
+      fi
+    done
+    ;;
+  MINGW*|MSYS*|CYGWIN*)
+    for candidate in \
+      "/c/Program Files/Google/Chrome/Application/chrome.exe" \
+      "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe"; do
+      if [[ -x "$candidate" ]]; then
+        "$candidate" "${args[@]}" >/dev/null 2>&1 &
+        exit 0
+      fi
+    done
+    ;;
+esac
+
+echo "Google Chrome not found. Set CHROME_BIN to the Chrome executable path." >&2
+exit 1

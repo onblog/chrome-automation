@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+state_dir="${CHROME_AUTOMATION_HOME:-${HOME}/.codex/chrome-automation}"
+node_prefix="${state_dir}/node"
+npm_cache="${npm_config_cache:-/tmp/npm-cache}"
+
+mkdir -p "$node_prefix" "$npm_cache"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "node is required but was not found." >&2
+  exit 1
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "npm is required but was not found." >&2
+  exit 1
+fi
+
+if ! command -v codex >/dev/null 2>&1; then
+  echo "codex is required but was not found." >&2
+  exit 1
+fi
+
+chmod +x \
+  "${script_dir}/chrome-debug-launch" \
+  "${script_dir}/chrome-cdp-open" \
+  "${script_dir}/chrome-devtools-mcp-current" \
+  "${script_dir}/doctor" \
+  "${script_dir}/uninstall"
+
+npm_config_cache="$npm_cache" npm install --prefix "$node_prefix" ws@latest --silent
+
+codex mcp remove chrome-devtools >/dev/null 2>&1 || true
+codex mcp add chrome-devtools --env "npm_config_cache=${npm_cache}" -- "${script_dir}/chrome-devtools-mcp-current"
+
+"${script_dir}/chrome-debug-launch" "about:blank"
+
+echo "Chrome automation setup complete."
+echo "Profile: ${CHROME_DEBUG_PROFILE:-${HOME}/.codex/chrome-debug-profile}"
+echo "Port: ${CHROME_DEBUG_PORT:-9223}"
+echo "State: ${state_dir}"
+echo "Run doctor: ${script_dir}/doctor"

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+profile_dir="${CHROME_DEBUG_PROFILE:-${HOME}/.codex/chrome-debug-profile}"
+port="${CHROME_DEBUG_PORT:-9223}"
+port_file="${profile_dir}/DevToolsActivePort"
+
+if [[ -f "$port_file" ]]; then
+  active_port="$(sed -n '1p' "$port_file")"
+  path="$(sed -n '2p' "$port_file")"
+  if [[ -n "$active_port" && -n "$path" ]]; then
+    exec npx --yes chrome-devtools-mcp@latest \
+      --wsEndpoint "ws://127.0.0.1:${active_port}${path}" \
+      --no-usage-statistics \
+      --no-performance-crux
+  fi
+fi
+
+exec npx --yes chrome-devtools-mcp@latest \
+  --browserUrl "http://127.0.0.1:${port}" \
+  --no-usage-statistics \
+  --no-performance-crux
