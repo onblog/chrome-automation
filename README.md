@@ -107,6 +107,8 @@ Do not point this skill at a daily browser profile unless the user explicitly re
 
 ## Uninstall
 
+Use the cleanup script for a full uninstall:
+
 ```bash
 "$skill_dir/scripts/uninstall"
 ```
@@ -119,6 +121,9 @@ This removes:
 - `~/.codex/chrome-automation`
 - `~/.codex/chrome-debug-profile`
 
+Note: `npx skills remove chrome-automation -g --agent codex -y` removes the installed skill files, but the current `skills` CLI does not run this skill's cleanup script during removal. Run `scripts/uninstall` first when you want to remove the MCP entry, local dependency state, and dedicated Chrome profile too.
+
 ## License
 
 MIT
+

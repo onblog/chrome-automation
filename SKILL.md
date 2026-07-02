@@ -55,6 +55,8 @@ Uninstall and remove this skill's local state:
 
 Uninstall removes the Codex `chrome-devtools` MCP entry, this skill directory when it is safe to remove directly, the skill-local dependency/state directory, and the dedicated Chrome profile.
 
+Do not use `npx skills remove chrome-automation -g --agent codex -y` as the only uninstall step when cleanup matters. The current `skills` CLI removes installed skill files but does not run this skill's `scripts/uninstall` hook.
+
 ## Defaults
 
 - Profile: `$HOME/.codex/chrome-debug-profile`
@@ -125,3 +127,4 @@ Only this skill should use these default directories:
 - Chrome profile: `$HOME/.codex/chrome-debug-profile`
 
 Use `scripts/uninstall` when the user wants to remove the skill and its local environment together. If the skill was installed with `npx skills add`, prefer that script over manually deleting files so the `skills` lock state can be cleaned up.
+

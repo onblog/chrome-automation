@@ -102,6 +102,8 @@ Use $chrome-automation to open https://example.com and summarize the visible pag
 
 ## 卸载
 
+完整卸载请使用清理脚本：
+
 ```bash
 "$skill_dir/scripts/uninstall"
 ```
@@ -114,6 +116,9 @@ Use $chrome-automation to open https://example.com and summarize the visible pag
 - `~/.codex/chrome-automation`
 - `~/.codex/chrome-debug-profile`
 
+注意：`npx skills remove chrome-automation -g --agent codex -y` 只会删除已安装的 skill 文件；当前 `skills` CLI 在 remove 时不会自动执行这个 skill 的清理脚本。如果还要删除 MCP 配置、本地依赖状态和专用 Chrome profile，请先运行 `scripts/uninstall`。
+
 ## License
 
 MIT
+
